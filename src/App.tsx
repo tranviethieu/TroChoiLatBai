@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import StartScreen from "./components/StartScreen";
 
 // Kiểu dữ liệu cho thẻ bài
@@ -59,10 +58,9 @@ export default function App() {
     const total = cards.length;
     const middle = Math.floor(total / 2);
 
-    const revealInterval = 30; // ms delay between each card
+    const revealInterval = 30;
     const updated = [...cards];
 
-    // Lật từng lá từ giữa ra ngoài
     for (let i = 0; i < total; i++) {
       const index =
         i % 2 === 0 ? middle + Math.floor(i / 2) : middle - Math.ceil(i / 2);
@@ -72,7 +70,6 @@ export default function App() {
       }, i * revealInterval);
     }
 
-    // Sau 800ms, úp lại tất cả
     setTimeout(() => {
       setCards((prev) => prev.map((c) => ({ ...c, isFlipped: false })));
       setIsShuffling(false);
@@ -92,19 +89,10 @@ export default function App() {
     }, 200);
   };
 
-  // const resetGame = () => {
-  //   const newDeck = generateCards();
-  //   setCards(newDeck);
-  //   setSteps(0);
-  //   setTime(0);
-  //   setFlippedIndexes([]);
-  //   setIsRunning(true);
-  //   shuffleAnimation();
-  // };
   const resetGame = () => {
     const newDeck = generateCards();
     setCards(newDeck);
-    setShowStart(true); // quay lại màn hình bắt đầu
+    setShowStart(true);
     setIsRunning(false);
   };
 
@@ -150,17 +138,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-200 flex flex-col items-center justify-center p-4">
-      <AnimatePresence>
-        {showStart && <StartScreen onStart={startGame} />}
-      </AnimatePresence>
-
-      {!showStart && (
+      {showStart ? (
+        <StartScreen onStart={startGame} />
+      ) : (
         <>
           <h1 className="text-4xl font-bold mb-4 text-gray-800">
             🃏 Game Lật Bài
           </h1>
 
-          <div className="flex gap-6 text-lg mb-4">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-lg mb-4">
             <p>
               ⏱️ Thời gian: <span className="font-bold">{time}s</span>
             </p>
@@ -169,41 +155,30 @@ export default function App() {
             </p>
             <button
               onClick={resetGame}
-              className="ml-4 px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded shadow"
+              className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded shadow"
             >
               🔄 Chơi lại
             </button>
           </div>
 
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-4 sm:grid-cols-5 gap-4">
             {cards.map((card, index) => (
-              <motion.div
+              <div
                 key={card.id}
-                className={`w-20 h-28 relative cursor-pointer ${
+                className={`card-3d w-20 h-28 sm:w-24 sm:h-32 ${
                   card.isMatched ? "invisible" : ""
                 }`}
                 onClick={() => handleFlip(index)}
-                whileTap={{ scale: 0.95 }}
               >
-                <motion.div
-                  className="absolute w-full h-full rounded-lg shadow-lg"
-                  animate={{ rotateY: card.isFlipped ? 180 : 0 }}
-                  transition={{ duration: 0.5 }}
-                  style={{ transformStyle: "preserve-3d" }}
+                <div
+                  className={`card-inner ${
+                    card.isFlipped ? "rotate-y-180" : ""
+                  }`}
                 >
-                  <div className="absolute w-full h-full bg-blue-500 rounded-lg backface-hidden flex items-center justify-center">
-                    <span className="text-white text-2xl font-bold">?</span>
-                  </div>
-                  <div
-                    className="absolute w-full h-full bg-white rounded-lg text-black flex items-center justify-center backface-hidden"
-                    style={{ transform: "rotateY(180deg)" }}
-                  >
-                    <span className="text-2xl font-bold">
-                      {card.isFlipped ? card.value : ""}
-                    </span>
-                  </div>
-                </motion.div>
-              </motion.div>
+                  <div className="card-front">?</div>
+                  <div className="card-back">{card.value}</div>
+                </div>
+              </div>
             ))}
           </div>
 
